@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Stránka PLC</h1>
+    <h1>Stránka PLC - SCADA test</h1>
 
     <button @click="vyctiTag">Načti Tag {{ nazevTagu }}</button>
     <p class="tagy">{{ nazevTagu }} : {{ hodnotaTagu }}</p>
