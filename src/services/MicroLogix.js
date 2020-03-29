@@ -10,6 +10,10 @@ const apiClient = axios.create({
 });
 
 export default {
+  nactiPLC(cesta) {
+    //console.log("Volán GET s parametrem cesta: ", cesta);
+    return apiClient.get(cesta);
+  },
   nactiTag(cesta) {
     //console.log("Volán GET s parametrem cesta: ", cesta);
     return apiClient.get(cesta);

@@ -2,14 +2,14 @@
   <div>
     <h1>Stránka PLC</h1>
 
-    <button @click="nactiN7">Aktualizuj Tag</button>
-    <p class="tagy">N7:0 --> {{ tagN7_0 }}</p>
+    <button @click="vyctiTag">Načti Tag {{ nazevTagu }}</button>
+    <p class="tagy">{{ nazevTagu }} : {{ hodnotaTagu }}</p>
 
     <form @submit.prevent="zapisTag"></form>
-    <label>Hodnota N7:40</label>
+    <label>Hodnota {{ nazevTagu }}</label>
     <input
       class="vstup"
-      v-model="k_zapsani_N7_40"
+      v-model="hodnota_k_zapsani"
       type="number"
       placeholder="Zadej požadovanou hodnotu N7:40"
     />
@@ -18,8 +18,8 @@
     <br />
     <button @click="nactiPLC">Aktualizuj PLC Tagy</button>
     <div class="box-s-textem">
-      <p class="tagy" v-for="tag in poleTagu" :key="tag[0]">
-        {{ Object.keys(tag)[0] }} = {{ tag[Object.keys(tag)[0]] }}
+      <p class="tagy" v-for="tag in poleTagu" :key="tag.id">
+        {{ tag.name }} = {{ tag.value }}
       </p>
     </div>
     <p>{{ timer }}</p>
@@ -32,64 +32,55 @@ import MicroLogix from "@/services/MicroLogix.js";
 export default {
   data() {
     return {
-      tagN7_0: 222,
+      cestaApi: "/api/plc/",
       nazevTagu: "N7:40",
-      k_zapsani_N7_40: 0,
-      tagN7_40: 0,
+      hodnotaTagu: 0,
+      hodnota_k_zapsani: 0,
       poleTagu: [],
-      timer: ""
+      timer: "",
+      periodaVycitani: 300 // minimum je 200 ms
     };
   },
   methods: {
-    nactiN7() {
-      //console.log("Před voláním MicroLogix service");
-      MicroLogix.nactiTag("/api/plc/N7:0")
-        .then(vysledek => {
-          var klic = Object.keys(vysledek.data[0]);
-          //console.log("Návrat s výsledkem: ", klic);
-          console.table(vysledek.data);
-          //var tag = "N7:0";
-          //console.log(vysledek.data[0][klic]);
-          this.tagN7_0 = vysledek.data[0][klic];
-        })
-        .catch(error => {
-          console.log("Chyba při vyčítání PLC: ", error);
-        });
-    },
     nactiPLC: function() {
-      MicroLogix.nactiTag("/api/plc")
+      MicroLogix.nactiPLC("/api/plc")
         .then(vysledek => {
-          //console.log("Návrat s výsledkem: ", klic);
-          //console.table(vysledek.data);
-          //var tag = "N7:0";
-          //console.log(vysledek.data[0][klic]);
-          this.poleTagu = vysledek.data;
+          this.poleTagu = vysledek.data.values;
+          console.log("vysledek.data: ", vysledek);
         })
         .catch(error => {
           console.log("Chyba při vyčítání PLC: ", error);
         });
     },
     zapisTag: function() {
-      var pole = [];
-      pole.push("N7:40");
-      pole.push(this.k_zapsani_N7_40);
-      MicroLogix.zapisTag("/api/plc/zapis", pole)
+      var objektZapisu = {};
+      objektZapisu.name = this.nazevTagu;
+      objektZapisu.value = this.hodnota_k_zapsani;
+      MicroLogix.zapisTag("/api/plc/zapis", objektZapisu)
         .then(vysledek => {
-          //console.log("Návrat s výsledkem: ", klic);
-          //console.table(vysledek.data);
-          //var tag = "N7:0";
-          //console.log(vysledek.data[0][klic]);
           console.log(vysledek);
           this.poleTagu = vysledek.data;
         })
         .catch(error => {
           console.log("Chyba při vyčítání PLC: ", error);
         });
+    },
+    vyctiTag: function() {
+      console.log("Vstup do vyctiTag");
+      for (var i = 0; i < this.poleTagu.length; i++) {
+        if (this.poleTagu[i].name === this.nazevTagu) {
+          console.log("this.poleTagu[i].value: ", this.poleTagu[i].value);
+          console.log("this.nazevTagu: ", this.nazevTagu);
+          this.hodnotaTagu = this.poleTagu[i].value;
+          return 23;
+        }
+      }
     }
   },
+  computed: {},
   created() {
     this.nactiPLC();
-    this.timer = setInterval(this.nactiPLC, 100);
+    this.timer = setInterval(this.nactiPLC, this.periodaVycitani);
   },
   beforeDestroy() {
     clearInterval(this.timer);
