@@ -6,7 +6,7 @@
     <p class="tagy">{{ nazevTagu }} : {{ hodnotaTagu }}</p>
 
     <form @submit.prevent="zapisTag"></form>
-    <label>Hodnota {{ nazevTagu }}</label>
+    <label>Hodnota {{ nazevTagu }} </label>
     <input
       class="vstup"
       v-model="hodnota_k_zapsani"
