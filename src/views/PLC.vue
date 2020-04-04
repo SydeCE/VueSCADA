@@ -35,9 +35,9 @@ export default {
       cestaApi: "/api/plc/",
       nazevTagu: "N7:40",
       hodnotaTagu: 0,
-      hodnota_k_zapsani: 0,
       poleTagu: [],
       timer: "",
+      hodnota_k_zapsani: 0,
       periodaVycitani: 300 // minimum je 200 ms
     };
   },
@@ -72,6 +72,7 @@ export default {
           console.log("this.poleTagu[i].value: ", this.poleTagu[i].value);
           console.log("this.nazevTagu: ", this.nazevTagu);
           this.hodnotaTagu = this.poleTagu[i].value;
+          this.hodnota_k_zapsani = this.hodnotaTagu;
           return 23;
         }
       }
